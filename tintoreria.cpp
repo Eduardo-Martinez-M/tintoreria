@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <fstream>
 
 using namespace std;
 
@@ -50,6 +51,7 @@ bool codigoSubservicioValido(string codigoSubservicio);
 string pedirCodigoSubservicio();
 bool numeroValido(string numero);
 string pedirNumeroDePrendas();
+bool verificarCodigoExistente(string codigo);
 
 int main(void) {
 	
@@ -731,4 +733,32 @@ string pedirNumeroDePrendas() {
   	return numeroDePrendas;
 }
 
+bool verificarCodigoExistente(string codigo) {
+	ifstream archivo("servicios.txt");
+
+	if(!archivo) {
+		return false;
+	}
+	char lineaDeArchivo[100];
+	
+	while(archivo) {
+	archivo.getline(lineaDeArchivo, 100);  
+		if(archivo) {
+			if (!(lineaDeArchivo[0] == '\0' || lineaDeArchivo[0] == '\t' || lineaDeArchivo[0] == ' ')) {
+				
+			    string codigoGuardado = ""; 
+			    for (int i = 0; i < 4; i++) { 
+			        codigoGuardado = codigoGuardado + lineaDeArchivo[i]; 
+			    }  
+				if (codigoGuardado == codigo) {
+					return true;
+				}
+			}
+		}
+	}
+	
+	archivo.close();
+	
+	return false;
+}
 
