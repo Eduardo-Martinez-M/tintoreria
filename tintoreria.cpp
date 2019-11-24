@@ -52,8 +52,13 @@ string pedirCodigoSubservicio();
 bool numeroValido(string numero);
 string pedirNumeroDePrendas();
 bool verificarCodigoExistente(string codigo);
+bool verificarCodigoSubServicioExistente(string codigo, string codigoSubservicio);
 
 int main(void) {
+	string codigo = "1111";
+	string subcodigo = "01";
+	
+	bool subcodigoEncontrado = verificarCodigoSubServicioExistente(codigo, subcodigo);
 	
 	int menu, cantidadServicios;
 	int cantidadSubservicios[' '];
@@ -752,6 +757,47 @@ bool verificarCodigoExistente(string codigo) {
 			    }  
 				if (codigoGuardado == codigo) {
 					return true;
+				}
+			}
+		}
+	}
+	
+	archivo.close();
+	
+	return false;
+}
+
+bool verificarCodigoSubServicioExistente(string codigo, string codigoSubservicio) {
+	ifstream archivo("servicios.txt");
+
+	if(!archivo) {
+		return false;
+	}
+	char lineaDeArchivo[100];
+	bool servicioEncontrado = false;
+	
+	while(archivo) {
+		archivo.getline(lineaDeArchivo, 100);  
+		if(archivo) {
+			if (lineaDeArchivo[0] == '\0' || lineaDeArchivo[0] == ' ') continue;
+			if (!servicioEncontrado && lineaDeArchivo[0] == '\t') continue; 
+		
+			if (servicioEncontrado) {
+				string codigoSubservicioGuardado = ""; 
+			    for (int i = 0; i < 2; i++) { 
+			    	int posicionDelTabulador = 1;
+			        codigoSubservicioGuardado = codigoSubservicioGuardado + lineaDeArchivo[i + posicionDelTabulador]; 
+			    }  
+				if (codigoSubservicioGuardado == codigoSubservicio) {
+					return true;
+				}
+			} else {
+				string codigoGuardado = ""; 
+			    for (int i = 0; i < 4; i++) { 
+			        codigoGuardado = codigoGuardado + lineaDeArchivo[i]; 
+			    }  
+				if (codigoGuardado == codigo) {
+					servicioEncontrado = true;
 				}
 			}
 		}
