@@ -1,6 +1,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
+#include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -41,7 +44,15 @@ void buscarSubserviciosPorCodigo(struct servicio *servicios, int *cantidadSubser
 
 void generarTicket(struct servicio *servicios, int cantidad, int *cantidadSubservicios);
 
+bool codigoServicioValido(string codigoServicio);
+string pedirCodigoServicio();
+bool codigoSubservicioValido(string codigoSubservicio);
+string pedirCodigoSubservicio();
+bool numeroValido(string numero);
+string pedirNumeroDePrendas();
+
 int main(void) {
+	
 	int menu, cantidadServicios;
 	int cantidadSubservicios[' '];
 	struct servicio servicios[' '];
@@ -105,7 +116,7 @@ int main(void) {
 				generarTicket(servicios, cantidadServicios, cantidadSubservicios);
 				break;
 
-			case 0:
+			case 0: // DEBERIA CAMBIARSE A CUALQUIER TECLA, O AL TERMINAR CUALQUIER ACCION
 				guardarArchivo(servicios, cantidadServicios, cantidadSubservicios);
 				break;
 		}
@@ -603,58 +614,121 @@ void buscarSubserviciosPorCodigo(struct servicio *servicios, int *cantidadSubser
 }
 
 void generarTicket(struct servicio *servicios, int cantidad, int *cantidadSubservicios) {
-	bool otro;
-	int prendas, codigoServicio, codigoSubservicio, otroServicio;
-	int c, c2;
-	int i = 0, numServicios;
-	float subtotal, iva, total;
+	string codigoServicio = pedirCodigoServicio();
+  	string codigoSubServicio = pedirCodigoSubservicio();
+  	string numeroDePrendas = pedirNumeroDePrendas();
+  	
+  	string servicioConsultado = "Buscar el servicio " + codigoServicio;
+  	string subservicioConsultado = "Buscar el 1 subservicio " + codigoSubServicio;
+  	
+  	std::vector<std::string> subservicioConsultadoPartido;
+	std::istringstream iss(subservicioConsultado);
+	for(std::string s; iss >> s; )
+    	subservicioConsultadoPartido.push_back(s);
+  	
+  	int posicionDelPrecioEnSubservicio = 2;
+  	string precioSubServicio = subservicioConsultadoPartido[posicionDelPrecioEnSubservicio];
+  	
+  	int numPrendas = std::stoi(numeroDePrendas);
+  	int precioSubServ = std::stoi(precioSubServicio);
+  	
+  	cout << endl;
+  	cout << servicioConsultado << endl;
+  	cout << subservicioConsultado << endl;
+	cout << "Numero de prendas: " << numeroDePrendas << endl; 
+	cout << endl;
 	
-	int codigo[' '];
-	string nombreSubServicio[' '];
-	float precioUnitario[' '];
-	
-	cout<<"***** VENTA *****"<<endl;
-	
-	do{
-		cout<<"Ingresa el codigo del servicio"<<endl;
-		cin>>codigoServicio;
-		for(c = 0; c < cantidad; c++) {
-			if( servicios[c].codigoServicio == codigoServicio) {
-				cout<<"Ingrese el Numero de Subservicio del Subservicio que desea buscar: ";
-				cin>>codigoSubservicio;
-				for(c2 = 0; c2 < cantidadSubservicios[c]; c2++) {
-					if(servicios[c].subservicios[c].codigoSubervicio == codigoSubservicio) {
-						cout<<"Encontrado "<<servicios[c].subservicios[c2].codigoSubervicio<<" "<<servicios[c].subservicios[c2].nombreSubervicio<<" $"<<servicios[c].subservicios[c2].precioUnitario<<endl;
-					
-						codigo[i] = servicios[c].subservicios[c2].codigoSubervicio;
-						nombreSubServicio[i] = servicios[c].subservicios[c2].nombreSubervicio;
-						precioUnitario[i] = servicios[c].subservicios[c2].precioUnitario;
-			
-						system("pause");
-					}
-				}
-			}
-		}	
-		cout<<"Numero de prendas"<<endl;
-		cin>>prendas;
-		
-		cout<<"¿Desea agregar otro servicio?"<<endl;
-		cin>>otroServicio;
-		
-		if(otroServicio == 1) {
-			otro = true;
-			i++;
-			numServicios = i;
-		} else {
-			otro = false;
-		}
-	} while(otro);
-	
-	for(i = 0; i==numServicios; i++) {
-		cout<<codigo[i]<<endl;;
-	}
+	cout << "\tSubtotal: " << (numPrendas * precioSubServ) << endl;
+	cout << "\tIVA: " << (numPrendas * precioSubServ) * (.16)<< endl;
+	cout << "\tTotal: " << (numPrendas * precioSubServ) * (1.16)<< endl;
+	cout << endl;	
 	
 	system("pause");
-	
 }
+
+bool codigoServicioValido(string codigoServicio) {
+	if (codigoServicio.length() != 4) {
+		cout << "El codigo del servicio consta de 4 caracteres" << endl;
+		return false;
+	}
+	
+	for(std::string::size_type i = 0; i < codigoServicio.size(); ++i)
+  	{
+    	if( !std::isdigit(codigoServicio[i]) ) {
+		
+      		cout << "El codigo del servicio es un numero" << endl;
+      		return false;
+      	}
+  	}
+  	
+  	return true;
+}
+
+string pedirCodigoServicio() {
+	
+	string codigoServicio;
+	
+	do {
+		cout << "Ingresa el codigo del servicio: ";
+		cin >> codigoServicio;
+	} while (!codigoServicioValido(codigoServicio));	
+  	
+  	return codigoServicio;
+}
+
+bool codigoSubservicioValido(string codigoSubservicio) {
+	if (codigoSubservicio.length() != 2) {
+		cout << "El codigo del subservicio consta de 2 caracteres" << endl;
+		return false;
+	}
+	
+	for(std::string::size_type i = 0; i < codigoSubservicio.size(); ++i)
+  	{
+    	if( !std::isdigit(codigoSubservicio[i]) ) {
+		
+      		cout << "El codigo del subservicio es un numero" << endl;
+      		return false;
+      	}
+  	}
+  	
+  	return true;
+}
+
+string pedirCodigoSubservicio() {
+	
+	string codigoSubservicio;
+	
+	do {
+		cout << "Ingresa el codigo del subservicio: ";
+		cin >> codigoSubservicio;
+	} while (!codigoSubservicioValido(codigoSubservicio));	
+  	
+  	return codigoSubservicio;
+}
+
+bool numeroValido(string numero) {	
+	for(std::string::size_type i = 0; i < numero.size(); ++i)
+  	{
+    	if( !std::isdigit(numero[i]) ) {
+		
+      		cout << "No es un numero" << endl;
+      		return false;
+      	}
+  	}
+  	
+  	return true;
+}
+
+string pedirNumeroDePrendas() {
+	
+	string numeroDePrendas;
+	
+	do {
+		cout << "Ingresa el numero de prendas a realizar el subservicio: ";
+		cin >> numeroDePrendas;
+	} while (!numeroValido(numeroDePrendas));	
+  	
+  	return numeroDePrendas;
+}
+
 
